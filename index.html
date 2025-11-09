@@ -3,7 +3,23 @@
 <head>
     <title>November Time Scale Clock</title>
     <style>
-        /* CSS styling will go here */
+        /* Optional: Add basic styling to make it look like a clock */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-color: #f4f4f4;
+        }
+        #clock {
+            font-size: 4em;
+            color: #333;
+            margin: 20px 0;
+            border: 2px solid #ccc;
+            padding: 15px;
+            display: inline-block;
+            background-color: white;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
@@ -11,58 +27,57 @@
     <div id="clock">
         <span id="simulatedTime">--:--:--</span>
     </div>
-    <p>Target End Time: November 30, 11:59:59 PM EST</p>
+    <p>Time remaining until the end of November, displayed on a 24-hour scale.</p>
 
     <script>
-        // JavaScript code will go here
+        // Define the exact end of November 2025 (Date object months are 0-indexed: Nov is 10)
+        // Using the current time zone (EST) of the server/user's browser
+        const END_DATE = new Date('November 30, 2025 23:59:59 EST'); 
+
+        // Scaling Factor (SF24): 1 simulated minute = 30 real minutes
+        const SCALING_FACTOR = 30; 
+
+        function updateClock() {
+            const now = new Date();
+            
+            // 1. Calculate Real Time Remaining (in milliseconds)
+            const timeRemaining_ms = END_DATE.getTime() - now.getTime();
+
+            // Check if the countdown is over
+            if (timeRemaining_ms <= 0) {
+                document.getElementById('simulatedTime').innerText = "00:00:00 - DONE";
+                clearInterval(timerInterval); // Stop the clock
+                return;
+            }
+
+            // 2. Convert to Simulated Time
+            // Convert real remaining milliseconds to real remaining minutes (divide by 60,000)
+            const realMinutesRemaining = timeRemaining_ms / 60000;
+            
+            // Scale the remaining minutes using the 24-hour factor (30 real minutes per 1 simulated minute)
+            const simulatedMinutesRemaining = realMinutesRemaining / SCALING_FACTOR;
+
+            // 3. Deconstruct Simulated Time into H:M:S
+            
+            const totalSimulatedSeconds = Math.floor(simulatedMinutesRemaining * 60);
+
+            // Calculate hours, minutes, and seconds for the display
+            const hours = Math.floor(totalSimulatedSeconds / 3600);
+            const minutes = Math.floor((totalSimulatedSeconds % 3600) / 60);
+            const seconds = totalSimulatedSeconds % 60;
+
+            // 4. Format the Output
+            const h = String(hours).padStart(2, '0');
+            const m = String(minutes).padStart(2, '0');
+            const s = String(seconds).padStart(2, '0');
+
+            // Display the simulated time
+            document.getElementById('simulatedTime').innerText = `${h}:${m}:${s}`;
+        }
+
+        // Start the clock and update it every 1000 milliseconds (1 second)
+        const timerInterval = setInterval(updateClock, 1000);
+        updateClock(); // Run immediately to avoid a 1-second delay
     </script>
-</body>
+    </body>
 </html>
-// Define the exact end of November 2025 (in your time zone, assuming EST)
-// Note: JavaScript Date object months are 0-indexed (Nov is month 10)
-const END_DATE = new Date('November 30, 2025 23:59:59 EST'); 
-
-// Scaling Factor (SF24): 1 simulated minute = 30 real minutes
-const SCALING_FACTOR = 30;
-function updateClock() {
-    const now = new Date();
-    
-    // 1. Calculate Real Time Remaining (in milliseconds)
-    const timeRemaining_ms = END_DATE.getTime() - now.getTime();
-
-    // Check if the countdown is over
-    if (timeRemaining_ms <= 0) {
-        document.getElementById('simulatedTime').innerText = "00:00:00 - DONE";
-        clearInterval(timerInterval); // Stop the clock
-        return;
-    }
-
-    // 2. Convert to Simulated Time
-    // A. Convert real remaining milliseconds to real remaining minutes (divide by 60,000)
-    const realMinutesRemaining = timeRemaining_ms / 60000;
-    
-    // B. Scale the remaining minutes using the 24-hour factor (30 real minutes per 1 simulated minute)
-    const simulatedMinutesRemaining = realMinutesRemaining / SCALING_FACTOR;
-
-    // 3. Deconstruct Simulated Time into H:M:S
-    
-    // Total simulated seconds remaining
-    const totalSimulatedSeconds = Math.floor(simulatedMinutesRemaining * 60);
-
-    // Calculate hours, minutes, and seconds for the display
-    const hours = Math.floor(totalSimulatedSeconds / 3600);
-    const minutes = Math.floor((totalSimulatedSeconds % 3600) / 60);
-    const seconds = totalSimulatedSeconds % 60;
-
-    // 4. Format the Output
-    const h = String(hours).padStart(2, '0');
-    const m = String(minutes).padStart(2, '0');
-    const s = String(seconds).padStart(2, '0');
-
-    // Display the simulated time (time remaining in the 24-hour simulation)
-    document.getElementById('simulatedTime').innerText = `${h}:${m}:${s}`;
-}
-
-// Start the clock and update it every 1000 milliseconds (1 second)
-const timerInterval = setInterval(updateClock, 1000);
-updateClock(); // Run immediately to avoid a 1-second delay

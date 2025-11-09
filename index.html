@@ -1,83 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>November Time Scale Clock</title>
-    <style>
-        /* Optional: Add basic styling to make it look like a clock */
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
-            background-color: #f4f4f4;
-        }
-        #clock {
-            font-size: 4em;
-            color: #333;
-            margin: 20px 0;
-            border: 2px solid #ccc;
-            padding: 15px;
-            display: inline-block;
-            background-color: white;
-            border-radius: 10px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>November Progress Clock</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f4f4f4;
+    margin-top: 100px;
+  }
+  #clock {
+    font-size: 2em;
+    background: white;
+    display: inline-block;
+    padding: 20px 40px;
+    border-radius: 15px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+</style>
 </head>
 <body>
-    <h1>November Simulation Countdown</h1>
-    <div id="clock">
-        <span id="simulatedTime">--:--:--</span>
-    </div>
-    <p>Time remaining until the end of November, displayed on a 24-hour scale.</p>
+  <h1>November Progress Clock</h1>
+  <div id="clock">Loading...</div>
 
-    <script>
-        // Define the exact end of November 2025 (Date object months are 0-indexed: Nov is 10)
-        // Using the current time zone (EST) of the server/user's browser
-        const END_DATE = new Date('November 30, 2025 23:59:59 EST'); 
+  <script>
+    function updateClock() {
+      const now = new Date();
+      const month = now.getMonth(); // 0 = Jan, 10 = Nov
+      const year = now.getFullYear();
 
-        // Scaling Factor (SF24): 1 simulated minute = 30 real minutes
-        const SCALING_FACTOR = 30; 
+      // Only run properly for November
+      const daysInNovember = 30;
+      const startOfMonth = new Date(year, 10, 1, 0, 0, 0); // Nov 1, 12:00 AM
+      const endOfMonth = new Date(year, 10, 30, 23, 59, 59); // Nov 30, 11:59:59 PM
+      const totalMonthTime = endOfMonth - startOfMonth;
+      const elapsed = now - startOfMonth;
 
-        function updateClock() {
-            const now = new Date();
-            
-            // 1. Calculate Real Time Remaining (in milliseconds)
-            const timeRemaining_ms = END_DATE.getTime() - now.getTime();
+      let progress = elapsed / totalMonthTime; // value between 0 and 1
+      progress = Math.min(Math.max(progress, 0), 1); // clamp
 
-            // Check if the countdown is over
-            if (timeRemaining_ms <= 0) {
-                document.getElementById('simulatedTime').innerText = "00:00:00 - DONE";
-                clearInterval(timerInterval); // Stop the clock
-                return;
-            }
+      // Map progress to 7 AM → 10 PM (15 hours = 900 minutes)
+      const startMinutes = 7 * 60;
+      const endMinutes = 22 * 60;
+      const totalMinutes = endMinutes - startMinutes;
+      const currentMinutes = startMinutes + progress * totalMinutes;
 
-            // 2. Convert to Simulated Time
-            // Convert real remaining milliseconds to real remaining minutes (divide by 60,000)
-            const realMinutesRemaining = timeRemaining_ms / 60000;
-            
-            // Scale the remaining minutes using the 24-hour factor (30 real minutes per 1 simulated minute)
-            const simulatedMinutesRemaining = realMinutesRemaining / SCALING_FACTOR;
+      const hours = Math.floor(currentMinutes / 60);
+      const minutes = Math.floor(currentMinutes % 60);
 
-            // 3. Deconstruct Simulated Time into H:M:S
-            
-            const totalSimulatedSeconds = Math.floor(simulatedMinutesRemaining * 60);
+      // Format to 12-hour time
+      const suffix = hours >= 12 ? "PM" : "AM";
+      const displayHour = ((hours + 11) % 12) + 1;
+      const displayMinutes = minutes.toString().padStart(2, "0");
 
-            // Calculate hours, minutes, and seconds for the display
-            const hours = Math.floor(totalSimulatedSeconds / 3600);
-            const minutes = Math.floor((totalSimulatedSeconds % 3600) / 60);
-            const seconds = totalSimulatedSeconds % 60;
+      document.getElementById("clock").textContent = `${displayHour}:${displayMinutes} ${suffix}`;
+    }
 
-            // 4. Format the Output
-            const h = String(hours).padStart(2, '0');
-            const m = String(minutes).padStart(2, '0');
-            const s = String(seconds).padStart(2, '0');
-
-            // Display the simulated time
-            document.getElementById('simulatedTime').innerText = `${h}:${m}:${s}`;
-        }
-
-        // Start the clock and update it every 1000 milliseconds (1 second)
-        const timerInterval = setInterval(updateClock, 1000);
-        updateClock(); // Run immediately to avoid a 1-second delay
-    </script>
-    </body>
+    updateClock(); // Run immediately
+    setInterval(updateClock, 60000); // Update every minute
+  </script>
+</body>
 </html>

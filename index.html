@@ -8,58 +8,64 @@
   body {
     font-family: Arial, sans-serif;
     text-align: center;
-    background-color: #f4f4f4;
-    margin-top: 100px;
+    background-color: #f0f2f5;
+    margin-top: 80px;
   }
   #clock {
-    font-size: 2em;
+    font-size: 2.5em;
     background: white;
     display: inline-block;
-    padding: 20px 40px;
-    border-radius: 15px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    padding: 25px 50px;
+    border-radius: 20px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+  }
+  #progress {
+    margin-top: 20px;
+    font-size: 1.1em;
+    color: #555;
   }
 </style>
 </head>
 <body>
   <h1>November Progress Clock</h1>
   <div id="clock">Loading...</div>
+  <div id="progress"></div>
 
   <script>
     function updateClock() {
       const now = new Date();
-      const month = now.getMonth(); // 0 = Jan, 10 = Nov
       const year = now.getFullYear();
 
-      // Only run properly for November
-      const daysInNovember = 30;
-      const startOfMonth = new Date(year, 10, 1, 0, 0, 0); // Nov 1, 12:00 AM
-      const endOfMonth = new Date(year, 10, 30, 23, 59, 59); // Nov 30, 11:59:59 PM
-      const totalMonthTime = endOfMonth - startOfMonth;
+      const startOfMonth = new Date(year, 10, 1, 0, 0, 0); // Nov 1 00:00:00
+      const startOfNextMonth = new Date(year, 11, 1, 0, 0, 0); // Dec 1 00:00:00
+      const totalMonthTime = startOfNextMonth - startOfMonth;
       const elapsed = now - startOfMonth;
 
-      let progress = elapsed / totalMonthTime; // value between 0 and 1
-      progress = Math.min(Math.max(progress, 0), 1); // clamp
+      let progress = elapsed / totalMonthTime;
+      progress = Math.min(Math.max(progress, 0), 1);
 
-      // Map progress to 7 AM → 10 PM (15 hours = 900 minutes)
+      // Map progress to 7:00 AM → 10:00 PM (15 hours = 900 minutes)
       const startMinutes = 7 * 60;
-      const endMinutes = 22 * 60;
-      const totalMinutes = endMinutes - startMinutes;
+      const totalMinutes = 15 * 60; // 7AM → 10PM = 15 hours
       const currentMinutes = startMinutes + progress * totalMinutes;
 
       const hours = Math.floor(currentMinutes / 60);
       const minutes = Math.floor(currentMinutes % 60);
+      const seconds = Math.floor((currentMinutes * 60) % 60);
 
-      // Format to 12-hour time
       const suffix = hours >= 12 ? "PM" : "AM";
       const displayHour = ((hours + 11) % 12) + 1;
       const displayMinutes = minutes.toString().padStart(2, "0");
+      const displaySeconds = seconds.toString().padStart(2, "0");
 
-      document.getElementById("clock").textContent = `${displayHour}:${displayMinutes} ${suffix}`;
+      document.getElementById("clock").textContent =
+        `${displayHour}:${displayMinutes}:${displaySeconds} ${suffix}`;
+      document.getElementById("progress").textContent =
+        `Month progress: ${(progress * 100).toFixed(2)}%`;
     }
 
-    updateClock(); // Run immediately
-    setInterval(updateClock, 60000); // Update every minute
+    updateClock();
+    setInterval(updateClock, 1000); // update every second
   </script>
 </body>
 </html>
